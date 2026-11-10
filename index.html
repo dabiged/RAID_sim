@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAID Simulator - Interactive Learning Platform</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>RAID Simulator</h1>
+            <p class="subtitle">Interactive Learning Platform</p>
+        </header>
+
+        <div class="raid-selector">
+            <h2>Select RAID Level</h2>
+            <div class="button-group">
+                <button class="raid-btn active" data-raid="0">RAID 0</button>
+                <button class="raid-btn" data-raid="1">RAID 1</button>
+                <button class="raid-btn" data-raid="5">RAID 5</button>
+                <button class="raid-btn" data-raid="6">RAID 6</button>
+                <button class="raid-btn" data-raid="10">RAID 10</button>
+            </div>
+            <p class="scenario-info">Scenario: 5TB usable storage from 1TB drives</p>
+        </div>
+
+        <div class="main-content">
+            <div class="visual-section">
+                <h3>Visual RAID Controller</h3>
+                <div class="raid-info">
+                    <div class="info-item">
+                        <span class="label">RAID Type:</span>
+                        <span id="raid-type">RAID 0 - Striping</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Total Drives:</span>
+                        <span id="total-drives">5</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Usable Capacity:</span>
+                        <span id="usable-capacity">5TB</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Raw Capacity:</span>
+                        <span id="raw-capacity">5TB</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Overhead:</span>
+                        <span id="overhead">0TB (0%)</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Fault Tolerance:</span>
+                        <span id="fault-tolerance">None</span>
+                    </div>
+                </div>
+
+                <div class="drive-array-wrapper">
+                    <div id="drive-container" class="drive-container">
+                        <!-- Drives will be dynamically generated here -->
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-box data"></div>
+                        <span>Data</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box parity"></div>
+                        <span>Parity (P)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box parity2"></div>
+                        <span>Parity (Q)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box failed"></div>
+                        <span>Failed</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box rebuilding"></div>
+                        <span>Rebuilding</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box active"></div>
+                        <span>Active I/O</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-section">
+                <h3>Operations</h3>
+                <div class="controls">
+                    <button id="write-btn" class="control-btn write-btn">
+                        <span class="btn-icon">✍</span>
+                        Write Operation
+                    </button>
+                    <button id="read-btn" class="control-btn read-btn">
+                        <span class="btn-icon">📖</span>
+                        Read Operation
+                    </button>
+                    <button id="fail-btn" class="control-btn fail-btn">
+                        <span class="btn-icon">⚠</span>
+                        Simulate Disk Failure
+                    </button>
+                    <button id="rebuild-btn" class="control-btn rebuild-btn" disabled>
+                        <span class="btn-icon">🔧</span>
+                        Start Rebuild
+                    </button>
+                    <button id="reset-btn" class="control-btn reset-btn">
+                        <span class="btn-icon">↻</span>
+                        Reset Array
+                    </button>
+                </div>
+
+                <div class="metrics">
+                    <h3>Performance Metrics</h3>
+                    <div class="metric-grid">
+                        <div class="metric-item">
+                            <span class="metric-label">Write Latency</span>
+                            <span id="write-latency" class="metric-value">-</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Read Latency</span>
+                            <span id="read-latency" class="metric-value">-</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">IOPS</span>
+                            <span id="iops" class="metric-value">-</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Throughput</span>
+                            <span id="throughput" class="metric-value">-</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Array Status</span>
+                            <span id="array-status" class="metric-value status-healthy">Healthy</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Failed Drives</span>
+                            <span id="failed-drives" class="metric-value">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="rebuild-status" class="rebuild-status hidden">
+                    <h4>Rebuild Progress</h4>
+                    <div class="progress-bar">
+                        <div id="rebuild-progress" class="progress-fill"></div>
+                    </div>
+                    <p id="rebuild-info">Rebuilding... <span id="rebuild-percent">0</span>%</p>
+                    <p id="rebuild-time">Estimated time: <span id="rebuild-eta">-</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="advanced-settings-section">
+            <h3>⚙️ Advanced Settings</h3>
+            <button id="toggle-advanced" class="toggle-btn">Show Advanced Settings</button>
+
+            <div id="advanced-panel" class="advanced-panel hidden">
+                <div class="settings-grid">
+                    <!-- I/O Pattern -->
+                    <div class="setting-group">
+                        <label class="setting-label">
+                            Workload Pattern
+                            <span class="info-icon" title="Sequential: Large files read/written in order (video, backups). Random: Small scattered operations (databases, VMs). Mixed: Combination of both (typical applications).">ⓘ</span>
+                        </label>
+                        <div class="radio-group">
+                            <label title="Best for video streaming, file copies, backups"><input type="radio" name="io-pattern" value="sequential"> Sequential</label>
+                            <label title="Worst case - databases, VMs, transactional workloads"><input type="radio" name="io-pattern" value="random" checked> Random</label>
+                            <label title="Realistic - combination of sequential and random I/O"><input type="radio" name="io-pattern" value="mixed"> Mixed</label>
+                        </div>
+                    </div>
+
+                    <!-- Block Size -->
+                    <div class="setting-group">
+                        <label class="setting-label">
+                            Block Size
+                            <span class="info-icon" title="Block size is the amount of data transferred in a single I/O operation. Small blocks (4-8KB) are typical for databases with many small transactions. Large blocks (256KB-1MB) are better for video, backups, and sequential operations. Larger blocks = higher throughput but fewer IOPS.">ⓘ</span>
+                        </label>
+                        <select id="block-size">
+                            <option value="4">4 KB</option>
+                            <option value="8">8 KB</option>
+                            <option value="16">16 KB</option>
+                            <option value="32">32 KB</option>
+                            <option value="64" selected>64 KB</option>
+                            <option value="128">128 KB</option>
+                            <option value="256">256 KB</option>
+                            <option value="512">512 KB</option>
+                            <option value="1024">1 MB</option>
+                        </select>
+                    </div>
+
+                    <!-- Read/Write Ratio -->
+                    <div class="setting-group">
+                        <label class="setting-label">
+                            Read/Write Ratio
+                            <span class="info-icon" title="The percentage of read operations vs write operations in your workload. Most applications are read-heavy (70-95% reads). Web servers: 95% reads. Databases: 60-80% reads. Log/backup systems: 20% reads (write-heavy). Write-heavy workloads perform poorly on RAID 5/6 due to parity calculation overhead.">ⓘ</span>
+                        </label>
+                        <input type="range" id="rw-ratio" min="0" max="100" value="70" step="10">
+                        <div class="range-labels">
+                            <span id="read-percent">70% Read</span>
+                            <span id="write-percent">30% Write</span>
+                        </div>
+                    </div>
+
+                    <!-- Stripe Size -->
+                    <div class="setting-group">
+                        <label class="setting-label">
+                            Stripe Size
+                            <span class="info-icon" title="Stripe size (or chunk size) is the amount of data written to each drive before moving to the next drive in the array. Small stripes (16-64KB) are better for random I/O with multiple parallel operations. Large stripes (256KB-1MB) are better for sequential I/O. Best performance: stripe size should match or exceed your block size to avoid operations spanning multiple drives unnecessarily.">ⓘ</span>
+                        </label>
+                        <select id="stripe-size">
+                            <option value="16">16 KB</option>
+                            <option value="32">32 KB</option>
+                            <option value="64">64 KB</option>
+                            <option value="128" selected>128 KB</option>
+                            <option value="256">256 KB</option>
+                            <option value="512">512 KB</option>
+                            <option value="1024">1 MB</option>
+                        </select>
+                    </div>
+
+                    <!-- Controller Cache -->
+                    <div class="setting-group">
+                        <label class="setting-label">
+                            Controller Cache
+                            <span class="info-icon" title="RAID controller cache dramatically improves performance by buffering I/O operations. Write-Through: Writes acknowledged after hitting disk (safe but slow). Write-Back: Writes acknowledged when in cache (very fast but requires BBU). Read-Ahead: Prefetches sequential data (good for reads). Battery Backup Unit (BBU) is CRITICAL for write-back mode - without it, cached writes are lost on power failure! Larger cache = better burst performance and more effective for RAID 5/6 parity calculations.">ⓘ</span>
+                        </label>
+                        <select id="cache-size">
+                            <option value="0">No Cache</option>
+                            <option value="256">256 MB</option>
+                            <option value="512" selected>512 MB</option>
+                            <option value="1024">1 GB</option>
+                            <option value="2048">2 GB</option>
+                        </select>
+                        <select id="cache-policy">
+                            <option value="write-through">Write-Through</option>
+                            <option value="write-back" selected>Write-Back</option>
+                            <option value="read-ahead">Read-Ahead</option>
+                        </select>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="bbu-enabled" checked>
+                            Battery Backup Unit (BBU)
+                        </label>
+                    </div>
+
+                    <!-- Hot Spare -->
+                    <div class="setting-group">
+                        <label class="setting-label">
+                            Hot Spare
+                            <span class="info-icon" title="A hot spare is an unused drive that sits ready in your RAID controller. When a drive fails, the hot spare automatically activates and the array immediately begins rebuilding to it - no waiting for you to physically replace the failed drive. This dramatically reduces the 'vulnerability window' when your array is degraded. Without a hot spare, a second drive failure during manual replacement could mean total data loss. Cost: Hot spares count toward your total drive count but don't provide usable capacity.">ⓘ</span>
+                        </label>
+                        <select id="hot-spare">
+                            <option value="0" selected>None</option>
+                            <option value="1">1 Hot Spare</option>
+                            <option value="2">2 Hot Spares</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="preset-section">
+                    <h4>Preset Configurations</h4>
+                    <div class="preset-buttons">
+                        <button class="preset-btn" data-preset="database">💾 Database Server</button>
+                        <button class="preset-btn" data-preset="video">🎬 Video Storage</button>
+                        <button class="preset-btn" data-preset="web">🌐 Web Server</button>
+                        <button class="preset-btn" data-preset="backup">💿 Backup Target</button>
+                        <button class="preset-btn" data-preset="vm">🖥️ VM Storage</button>
+                    </div>
+                </div>
+
+                <div class="performance-impact" id="performance-impact">
+                    <h4>Performance Impact</h4>
+                    <p id="impact-message">Adjust settings to see performance recommendations...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="description-section">
+            <h3 id="description-title">RAID 0 - Striping</h3>
+            <p id="description-text"></p>
+            <div class="characteristics">
+                <h4>Characteristics:</h4>
+                <ul id="characteristics-list"></ul>
+            </div>
+        </div>
+
+        <footer class="version-footer">
+            <p>RAID Simulator v2.3.0 - Randomized I/O Operations</p>
+        </footer>
+    </div>
+
+    <script src="raid.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

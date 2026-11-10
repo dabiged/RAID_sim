@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  raid-simulator:
+    build: .
+    container_name: raid-simulator
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    networks:
+      - raid-network
+
+networks:
+  raid-network:
+    driver: bridge
