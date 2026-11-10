@@ -30,6 +30,8 @@ An interactive web-based simulator for learning RAID (Redundant Array of Indepen
   - Cache dramatically improves write performance
   - Block/stripe alignment optimization
 
+![Advanced UI](advanced.png "Advanced settings")
+
 ### Previous Updates (v1.2.0)
 - Fixed drive layout with columns as unique data and rows as mirrors
 - Improved operation animations showing correct RAID behavior
@@ -76,6 +78,8 @@ An interactive web-based simulator for learning RAID (Redundant Array of Indepen
 Simply open `index.html` in a modern web browser.
 
 ## How to Use
+
+![Basic UI](basic.png "Basic Operations")
 
 1. **Select a RAID Level**: Click on any of the RAID level buttons (0, 1, 5, 6, 10)
 
